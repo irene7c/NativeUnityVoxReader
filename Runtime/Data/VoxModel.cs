@@ -2,13 +2,13 @@ using UnityEngine;
 
 namespace Miventech.NativeUnityVoxReader.Data
 {
-    // Representa un modelo individual dentro del archivo VOX (corresponde a los chunks SIZE y XYZI)
+    // Represents an individual model within the VOX file (corresponds to SIZE and XYZI chunks)
     [System.Serializable]
     public class VoxModel
     {
-        public Vector3Int size; // Dimensiones del modelo
-        public Vector3Int position; // Posición del modelo en el mundo
-        public Voxel[] voxels;  // Lista de vóxeles que contiene
+        public Vector3Int size; // Model dimensions
+        public Vector3Int position; // Model position in the world
+        public Voxel[] voxels;  // List of voxels it contains
 
         public VoxModel()
         {

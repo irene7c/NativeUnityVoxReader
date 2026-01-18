@@ -33,7 +33,7 @@ namespace Miventech.NativeUnityVoxReader.Tools
             {
                 try
                 {
-                    // 1. Validar Header "VOX "
+                    // 1. Validate Header "VOX "
                     string header = new string(reader.ReadChars(4));
                     if (header != "VOX ")
                     {
@@ -41,10 +41,10 @@ namespace Miventech.NativeUnityVoxReader.Tools
                         return null;
                     }
 
-                    // 2. Versión
+                    // 2. Version
                     voxFile.version = reader.ReadInt32();
 
-                    // 3. Loop principal de lectura de Chunks
+                    // 3. Main Chunk reading loop
                     while (reader.BaseStream.Position < reader.BaseStream.Length)
                     {
                         ReadChunk(reader, voxFile, allNodes);
@@ -73,8 +73,7 @@ namespace Miventech.NativeUnityVoxReader.Tools
             switch (chunkId)
             {
                 case "MAIN":
-                    // MAIN chunk es contenedor, no tiene datos propios que necesitemos saltar
-                    // Simplemente seguimos leyendo para encontrar a sus hijos (SIZE, XYZI, etc.)
+                    // MAIN chunk is a container; continue reading for children (SIZE, XYZI, etc.)
                     break;
 
                 case "SIZE":
@@ -105,7 +104,7 @@ namespace Miventech.NativeUnityVoxReader.Tools
                     }
                     else
                     {
-                        // Si encontramos XYZI sin SIZE previo (raro), consumimos los datos
+                        // Consume data if XYZI is found without a preceding SIZE (unexpected)
                         reader.ReadBytes(contentSize);
                     }
                     break;
@@ -130,7 +129,7 @@ namespace Miventech.NativeUnityVoxReader.Tools
                     reader.ReadInt32(); // layer id
                     int numFrames = reader.ReadInt32();
 
-                    // Solo tomamos el primer frame para la posición base
+                    // Using the first frame for the base position
                     if (numFrames > 0)
                     {
                         var frameAttr = ReadDictionary(reader);
@@ -138,7 +137,7 @@ namespace Miventech.NativeUnityVoxReader.Tools
                         {
                             trn.translation = ParseVector3Int(frameAttr["_t"]);
                         }
-                        // Saltar el resto de frames si los hay (aunque usualmente es 1)
+                        // Skip remaining frames (usually 1)
                         for (int i = 1; i < numFrames; i++) ReadDictionary(reader);
                     }
                     allNodes.Add(trn);
@@ -161,7 +160,7 @@ namespace Miventech.NativeUnityVoxReader.Tools
                     shp.id = reader.ReadInt32();
                     shp.attributes = ReadDictionary(reader);
                     int numModels = reader.ReadInt32();
-                    // Usualmente un Shape Node apunta a un solo modelo
+                    // Typically a Shape Node points to a single model
                     if (numModels > 0)
                     {
                         shp.modelId = reader.ReadInt32();
@@ -171,12 +170,12 @@ namespace Miventech.NativeUnityVoxReader.Tools
                     break;
 
                 default:
-                    // Chunk desconocido o no implementado -> saltar su contenido
+                    // Unknown or unimplemented chunk -> skip content
                     reader.ReadBytes(contentSize);
                     break;
             }
 
-            // Asegurarse de que hemos consumido todo el contentSize
+            // Ensure entire contentSize has been consumed
             long bytesRead = reader.BaseStream.Position - startChunkPosition;
             if (bytesRead < contentSize)
             {
@@ -208,8 +207,8 @@ namespace Miventech.NativeUnityVoxReader.Tools
             string[] parts = v.Split(' ');
             if (parts.Length >= 3)
             {
-                // En VOX: parts[0]=X, parts[1]=Y (profundidad), parts[2]=Z (altura)
-                // En Unity queremos: X=X, Y=Z (altura), Z=Y (profundidad)
+                // In VOX: parts[0]=X, parts[1]=Y (depth), parts[2]=Z (height)
+                // For Unity: X=X, Y=Z (height), Z=Y (depth)
                 return new Vector3Int(int.Parse(parts[0]), int.Parse(parts[2]), int.Parse(parts[1]));
             }
             return Vector3Int.zero;
@@ -217,11 +216,11 @@ namespace Miventech.NativeUnityVoxReader.Tools
 
         private static void ApplyTransformations(VoxFile voxFile, List<VoxNode> nodes)
         {
-            // Mapeo rápido de IDs a nodos
+            // Quick ID to node mapping
             Dictionary<int, VoxNode> nodeMap = new Dictionary<int, VoxNode>();
             foreach (var node in nodes) nodeMap[node.id] = node;
 
-            // Recorremos los TransformNodes para encontrar sus modelos hijos
+            // Traverse TransformNodes to find child models
             foreach (var node in nodes)
             {
                 if (node is TransformNode trn)
@@ -267,7 +266,7 @@ namespace Miventech.NativeUnityVoxReader.Tools
                 byte g = (byte)((color >> 8) & 0xFF);
                 byte b = (byte)((color >> 16) & 0xFF);
                 byte a = (byte)((color >> 24) & 0xFF);
-                palette[i] = new Color32(r, g, b, 255); // Alpha 255 por defecto
+                palette[i] = new Color32(r, g, b, 255); // Default Alpha 255
             }
             return palette;
         }

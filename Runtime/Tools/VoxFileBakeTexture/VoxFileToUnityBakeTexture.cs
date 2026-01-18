@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Miventech.NativeUnityVoxReader.Data;
 using Miventech.NativeUnityVoxReader.Tools.VoxFileBakeTexture.Data;
+using System;
 
 namespace Miventech.NativeUnityVoxReader.Tools.VoxFileBakeTexture
 {
@@ -32,13 +33,13 @@ namespace Miventech.NativeUnityVoxReader.Tools.VoxFileBakeTexture
 
             if (quads.Count == 0) return null;
 
-            // 2. Crear Atlas de Textura
-            // Crear texturas temporales para cada quad
+            // 2. Create Texture Atlas
+            // Create temporary textures for each quad
             Texture2D[] tempTextures = new Texture2D[quads.Count];
             for (int i = 0; i < quads.Count; i++)
             {
                 QuadInfo q = quads[i];
-                // Crear textura del tamaño del quad
+                // Create texture of the quad size
                 Texture2D t = new Texture2D(q.width, q.height, TextureFormat.RGBA32, false);
                 t.filterMode = FilterMode.Point;
                 
@@ -47,25 +48,28 @@ namespace Miventech.NativeUnityVoxReader.Tools.VoxFileBakeTexture
                 tempTextures[i] = t;
             }
 
-            // Atlas 512x512 como base, pero permitimos crecer hasta maxAtlasSize si hace falta.
+            // 512x512 Atlas as base, but allow growth up to maxAtlasSize if needed.
             Texture2D atlas = new Texture2D(512, 512, TextureFormat.RGBA32, false);
             atlas.filterMode = FilterMode.Point;
             
-            // Empaquetar texturas. PackTextures devuelve los UV Rects en el atlas.
-            // padding=0 para pixel art exacto, o 1-2 si queremos evitar bleeding. pondremos 0.
+            // Pack textures. PackTextures returns the UV Rects in the atlas.
+            // padding=0 for exact pixel art, or 1-2 to avoid bleeding. We'll use 0.
             Rect[] uvRects = atlas.PackTextures(tempTextures, 0, settings.maxAtlasSize, false);
 
-            // Asignar Material con la textura "cocinada"
-            Material mat = new Material(Shader.Find("Standard"));
+            // Assign Material with the "baked" texture
+            Material mat = new Material(GetDefaultShader());
             result.texture = atlas; 
             mat.mainTexture = atlas;
-            mat.mainTexture.filterMode = FilterMode.Point; // Importante para voxel look
-            // Ajustar propiedades del material standard para que no sea muy brillante/specular por defecto si se desea
-            mat.SetFloat("_Glossiness", 0.0f); // Mate
+            mat.mainTexture.filterMode = FilterMode.Point; // Important for voxel look
+            
+            // Adjust properties to be Matte (Smoothness = 0)
+            // BRP uses _Glossiness, URP/HDRP use _Smoothness
+            if (mat.HasProperty("_Glossiness")) mat.SetFloat("_Glossiness", 0.0f);
+            if (mat.HasProperty("_Smoothness")) mat.SetFloat("_Smoothness", 0.0f);
             
             result.material = mat;
 
-            // 3. Generar Mesh Final mapeando UVs al atlas
+            // 3. Generate Final Mesh by mapping UVs to the atlas
             Mesh mesh = new Mesh();
             mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
 
@@ -79,10 +83,10 @@ namespace Miventech.NativeUnityVoxReader.Tools.VoxFileBakeTexture
             }
             for (int i = 0; i < vertices.Count; i++)
             {
-                // Opcional: Escalar a 0.1 para que el modelo no sea tan grande en Unity
+                // Optional: Scale to 1.0 or user scale
                 vertices[i] *= settings.Scale;
                 // Re-center mesh local position
-                // por lo que el ajuste del centro debe ser (size.x, size.z, size.y)
+                // so the center adjustment should be (size.x, size.z, size.y)
                 vertices[i] -= new Vector3(model.size.x * settings.Scale * 0.5f, model.size.z * settings.Scale * 0.5f, model.size.y * settings.Scale * 0.5f);
             }
             
@@ -95,8 +99,8 @@ namespace Miventech.NativeUnityVoxReader.Tools.VoxFileBakeTexture
             
             result.mesh = mesh;
 
-            // Limpieza de texturas temporales
-            // En editor usamos DestroyImmediate
+            // Cleanup temporary textures
+            // In editor use DestroyImmediate
             foreach (var t in tempTextures)
             {
                 if (t != null)
@@ -108,7 +112,27 @@ namespace Miventech.NativeUnityVoxReader.Tools.VoxFileBakeTexture
 
             return result;
         }
-        
+
+        private static Shader GetDefaultShader()
+        {
+            // Detect the current Render Pipeline
+            if (UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline != null)
+            {
+                string pipelineType = UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline.GetType().ToString();
+                
+                if (pipelineType.Contains("Universal"))
+                {
+                    return Shader.Find("Universal Render Pipeline/Lit");
+                }
+                if (pipelineType.Contains("HDRenderPipeline") || pipelineType.Contains("HighDefinition"))
+                {
+                    return Shader.Find("HDRP/Lit");
+                }
+            }
+            // Built-in Render Pipeline
+            return Shader.Find("Standard");
+        }
+
         private static void GenerateGreedyQuads(VoxModel model, Color32[] palette, List<QuadInfo> quads, VoxFileToUnityBakeTextureSetting settings = default)
         {
             Vector3Int size = model.size;
@@ -153,8 +177,8 @@ namespace Miventech.NativeUnityVoxReader.Tools.VoxFileBakeTexture
                                 }
                                 
                                 bool visible = (cCurrent != 0 && cNeighbor == 0);
-                                // IMPORTANTE: Guardamos el color en la máscara, pero para la fusión
-                                // solo nos importará si es != 0 para ignorar cambios de color
+                                // IMPORTANT: Save the color in the mask, but for merging
+                                // we only care if it's != 0 to ignore color changes
                                 mask[n++] = visible ? cCurrent : 0;
                             }
                         }
@@ -165,10 +189,10 @@ namespace Miventech.NativeUnityVoxReader.Tools.VoxFileBakeTexture
                             for (int i = 0; i < size[u]; i++)
                             {
                                 int c = mask[n];
-                                if (c != 0) // Si es visible
+                                if (c != 0) // If visible
                                 {
                                     int width = 1;
-                                    // Expandir ancho MIENTRAS sea visible (mask != 0), ignorando si cambia de color
+                                    // Expand width WHILE visible (mask != 0), ignoring color changes
                                     while (i + width < size[u] && mask[n + width] != 0 && width < settings.maxQuadSize) 
                                     {
                                         width++;
@@ -180,7 +204,7 @@ namespace Miventech.NativeUnityVoxReader.Tools.VoxFileBakeTexture
                                     {
                                         for (int k = 0; k < width; k++)
                                         {
-                                            // Verificar si la fila siguiente es visible en todo el ancho
+                                            // Check if the next row is visible across the entire width
                                             if (mask[n + k + height * size[u]] == 0)
                                             {
                                                 done = true;
@@ -196,10 +220,10 @@ namespace Miventech.NativeUnityVoxReader.Tools.VoxFileBakeTexture
                                     pos[v] = j; 
                                     pos[d] = x[d];
 
-                                    // Extraer los colores individuales de este bloque
+                                    // Extract individual colors from this block
                                     Color32[] quadColors = new Color32[width * height];
                                     
-                                    // Recorrer el área del quad para obtener los colores del volume original
+                                    // Iterate through the quad area to get colors from the original volume
                                     for (int ly = 0; ly < height; ly++)
                                     {
                                         for (int lx = 0; lx < width; lx++)
@@ -209,24 +233,18 @@ namespace Miventech.NativeUnityVoxReader.Tools.VoxFileBakeTexture
                                             voxelPos[v] = pos[v] + ly;
                                             voxelPos[d] = pos[d];
                                             
-                                            // Obtener indice de color del volume
+                                            // Get color index from volume
                                             int colorIdx = volume[voxelPos[0], voxelPos[1], voxelPos[2]];
                                             
-                                            // Convertir a Color32
+                                            // Convert to Color32
                                             Color32 colorPixel = Color.magenta;
                                             if (colorIdx - 1 < palette.Length && colorIdx - 1 >= 0) 
                                                 colorPixel = palette[colorIdx - 1];
                                                 
-                                            // Guardar en array linear. Texture2D llena de izquierda a derecha, abajo a arriba.
-                                            // La malla se genera con u (width) y v (height). 
-                                            // Asumimos mapeo directo: x = lx, y = ly.
+                                            
                                             quadColors[lx + ly * width] = colorPixel;
                                             
-                                            // Limpiar máscara
-                                            // La lógica original limpiaba después. Aquí limpiamos mientras leemos.
-                                            // Pero ojo, n apunta al inicio de la fila j.
-                                            // mask index = n + lx + ly * size[u]
-                                            // n = (j * size[u]) + i
+                                            
                                             mask[(j + ly) * size[u] + (i + lx)] = 0;
                                         }
                                     }
@@ -235,12 +253,9 @@ namespace Miventech.NativeUnityVoxReader.Tools.VoxFileBakeTexture
                                     int depthOffset = (faceDir == 1) ? 1 : 0;
                                     visualPos[d] += depthOffset;
 
-                                    // Guardar Info del Quad
                                     AddQuadInfo(visualPos, u, v, d, width, height, faceDir, quadColors, quads);
 
-                                    // IMPORTANTE: Ya limpiamos la mascara arriba al extraer colores.
                                     
-                                    // Avanzar indices para sincronizar n con i
                                     int skip = width - 1;
                                     i += skip;
                                     n += skip;
@@ -261,7 +276,7 @@ namespace Miventech.NativeUnityVoxReader.Tools.VoxFileBakeTexture
             q.height = height;
             q.faceDir = faceDir;
 
-            // Calcular vértices en Unity World Space
+            // Calculate vertices in Unity World Space
             // v0: 0,0
             int[] p0 = new int[]{ pos[0], pos[1], pos[2] };
             // v1: w,0
@@ -292,23 +307,23 @@ namespace Miventech.NativeUnityVoxReader.Tools.VoxFileBakeTexture
             verts.Add(q.v2);
             verts.Add(q.v3);
 
-            // UVs: Mapear esquinas del Quad (0,0 -> 1,1) al Rect del Atlas
+            // UVs: Map Quad corners (0,0 -> 1,1) to Atlas Rect
             // v0 (0,0) -> uvRect.min
             // v1 (w,0) -> uvRect.xMax, uvRect.yMin
             // v2 (0,h) -> uvRect.xMin, uvRect.yMax
             // v3 (w,h) -> uvRect.max
             
-            // Nota: En AddQuadInfo v0=(0,0), v1=(w,0), v2=(0,h), v3=(w,h) relativo al origen del quad.
+            // Note: In AddQuadInfo v0=(0,0), v1=(w,0), v2=(0,h), v3=(w,h) relative to quad origin.
             
             uvs.Add(new Vector2(uvRect.xMin, uvRect.yMin)); // v0
             uvs.Add(new Vector2(uvRect.xMax, uvRect.yMin)); // v1
-            uvs.Add(new Vector2(uvRect.xMin, uvRect.yMax)); // v2 (Cuidado con el orden v2/v3 en triángulos)
+            uvs.Add(new Vector2(uvRect.xMin, uvRect.yMax)); // v2 (Watch out for v2/v3 order in triangles)
             uvs.Add(new Vector2(uvRect.xMax, uvRect.yMax)); // v3
 
-            // Winding order (Triangulos)
+            // Winding order (Triangles)
             if (q.faceDir == 1)
             {
-                // Normal positiva
+                // Positive normal
                 tris.Add(baseIndex);     // 0
                 tris.Add(baseIndex + 2); // 2
                 tris.Add(baseIndex + 1); // 1
@@ -319,7 +334,7 @@ namespace Miventech.NativeUnityVoxReader.Tools.VoxFileBakeTexture
             }
             else
             {
-                // Normal negativa
+                // Negative normal
                 tris.Add(baseIndex);     // 0
                 tris.Add(baseIndex + 1); // 1
                 tris.Add(baseIndex + 2); // 2
@@ -347,12 +362,12 @@ namespace Miventech.NativeUnityVoxReader.Tools.VoxFileBakeTexture
             cols.Add(color);
             cols.Add(color);
 
-            // Primer triángulo
+            // First triangle
             tris.Add(baseIndex);
             tris.Add(baseIndex + 1);
             tris.Add(baseIndex + 2);
 
-            // Segundo triángulo
+            // Second triangle
             tris.Add(baseIndex);
             tris.Add(baseIndex + 2);
             tris.Add(baseIndex + 3);
